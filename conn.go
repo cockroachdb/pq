@@ -696,6 +696,7 @@ func (cn *conn) simpleQuery(q string) (res *rows, err error) {
 				cn.saveMessage(t, r)
 				return
 			}
+		case 'n':
 		case 'T':
 			if nextResult || querySent {
 				// res might be non-nil here if we received a previous
