@@ -117,6 +117,11 @@ type conn struct {
 	// debugging.
 	disablePreparedBinaryResult bool
 
+	// If set, this connection will not skip returning results for
+	// multi-statement queries where one of the statements does not return
+	// results such as CREATE TABLE or SET.
+	enableMultipleResults bool
+
 	// Whether to always send []byte parameters over as binary.  Enables single
 	// round-trip mode for non-prepared Query calls.
 	binaryParameters bool
@@ -141,6 +146,10 @@ func (c *conn) handleDriverSettings(o values) (err error) {
 	}
 
 	err = boolSetting("disable_prepared_binary_result", &c.disablePreparedBinaryResult)
+	if err != nil {
+		return err
+	}
+	err = boolSetting("enable_multiple_results", &c.enableMultipleResults)
 	if err != nil {
 		return err
 	}
@@ -662,6 +671,9 @@ func (cn *conn) simpleQuery(q string) (res *rows, err error) {
 				if t == 'C' {
 					res.result, res.tag = cn.parseComplete(r.string())
 				}
+				if cn.enableMultipleResults {
+					return
+				}
 			}
 		case 'Z':
 			cn.processReadyForQuery(r)
@@ -684,6 +696,7 @@ func (cn *conn) simpleQuery(q string) (res *rows, err error) {
 				cn.saveMessage(t, r)
 				return
 			}
+		case 'n':
 		case 'T':
 			if nextResult || querySent {
 				// res might be non-nil here if we received a previous
@@ -1174,6 +1187,8 @@ func isDriverSetting(key string) bool {
 	case "connect_timeout":
 		return true
 	case "disable_prepared_binary_result":
+		return true
+	case "enable_multiple_results":
 		return true
 	case "binary_parameters":
 		return true

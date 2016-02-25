@@ -341,7 +341,10 @@ func TestRowsCloseBeforeDone(t *testing.T) {
 }
 
 func TestMultipleResults(t *testing.T) {
-	db := openTestConn(t)
+	db, err := openTestConnConninfo("enable_multiple_results=yes")
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer db.Close()
 
 	var val int
@@ -374,10 +377,28 @@ func TestMultipleResults(t *testing.T) {
 	if val != 5 {
 		t.Fatalf("expected 5, but found %d", val)
 	}
+
+	rows, err := db.Query("CREATE TEMP TABLE temp (a int); SELECT 6;")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rows.Next() {
+		t.Fatalf("expected 0 results")
+	}
+	rows.Close()
+	if err := db.QueryRow(nextResultQuery).Scan(&val); err != nil {
+		t.Fatal(err)
+	}
+	if val != 6 {
+		t.Fatalf("expected 6, but found %d", val)
+	}
 }
 
 func TestTxnMultipleResults(t *testing.T) {
-	db := openTestConn(t)
+	db, err := openTestConnConninfo("enable_multiple_results=yes")
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer db.Close()
 
 	tx, err := db.Begin()
