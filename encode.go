@@ -351,9 +351,7 @@ func ParseTimestamp(currentLocation *time.Location, str string) (time.Time, erro
 
 	var hour, minute, second int
 	if len(str) > monSep+len("01-01")+1 {
-		if c := str[timeSep]; c != ' ' && c != 'T' && c != 't' {
-			return time.Time{}, fmt.Errorf("expected ' ' or 'T' at position %v; got %v", timeSep, c)
-		}
+		p.expect(str, " ", timeSep)
 		minSep := timeSep + 3
 		p.expect(str, ":", minSep)
 		hour = p.mustAtoi(str, timeSep+1, minSep)
