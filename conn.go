@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"crypto/tls"
 	"crypto/x509"
-	"database/sql"
 	"database/sql/driver"
 	"encoding/binary"
 	"errors"
@@ -43,10 +42,6 @@ type drv struct{}
 
 func (d *drv) Open(name string) (driver.Conn, error) {
 	return Open(name)
-}
-
-func init() {
-	sql.Register("postgres", &drv{})
 }
 
 type parameterStatus struct {
