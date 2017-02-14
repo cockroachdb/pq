@@ -1,3 +1,9 @@
+# NOTICE
+
+CockroachDB forked lib/pq to make some custom changes, but we have since migrated back to lib/pq and this package is no longer in use. It is kept here for historical reasons.
+
+---
+
 # pq - A pure Go postgres driver for Go's database/sql package
 
 [![Build Status](https://travis-ci.org/lib/pq.png?branch=master)](https://travis-ci.org/lib/pq)
